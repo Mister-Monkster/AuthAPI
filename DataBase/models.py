@@ -19,7 +19,7 @@ class UserModel(Base):
     password: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True, index=True)
     phone: Mapped[Optional[str]] = mapped_column(String(11), unique=True, index=True)
-    birth: Mapped[Optional[datetime.date]]
+    birth: Mapped[Optional[datetime.date]] = mapped_column(nullable=True)
     city: Mapped[Optional[str]]
     street: Mapped[Optional[str]]
     home: Mapped[Optional[str]]

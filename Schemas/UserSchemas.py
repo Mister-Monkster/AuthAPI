@@ -3,20 +3,37 @@ from typing import Optional, Any
 from typing_extensions import Self
 import re
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, ConfigDict
 
 
-class SRegistration(BaseModel):
+class SLogin(BaseModel):
+    email: str
+    password: str
+
+
+class SAuth(BaseModel):
     email: str
     username: str
     phone: str
-    password: str
     birth: Optional[datetime.date]
     city: Optional[str]
     street: Optional[str]
     home: Optional[str]
     flat: Optional[int]
     bio: Optional[str]
+
+
+class SRegistration(SLogin):
+    username: str
+    phone: str
+    birth: Optional[datetime.date]
+    city: Optional[str]
+    street: Optional[str]
+    home: Optional[str]
+    flat: Optional[int]
+    bio: Optional[str]
+
+    model_config = ConfigDict(from_attributes=True)
 
     @field_validator("password", mode="before")
     def validate_password(cls, value):
