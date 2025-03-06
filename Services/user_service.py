@@ -22,3 +22,10 @@ class UserService:
 
     async def login(self):
         pass
+
+    async def logut(self):
+        pass
+
+    async def update_user_data(self):
+        pass
+
