@@ -25,3 +25,4 @@ class UserModel(Base):
     home: Mapped[Optional[str]]
     flat: Mapped[Optional[int]]
     bio: Mapped[Optional[str]] = mapped_column(String(1024))
+    refresh_token: Mapped[Optional[str]] = mapped_column(default='')

@@ -58,3 +58,7 @@ class SRegistration(SLogin):
             raise ValueError('Данная электронная почта невалидная')
 
 
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
