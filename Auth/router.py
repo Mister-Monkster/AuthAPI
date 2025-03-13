@@ -1,13 +1,10 @@
-from typing import Annotated
+from fastapi import APIRouter, HTTPException, Response, Request
 
-from fastapi import APIRouter, Depends, Query, HTTPException, Response, Request
+from fastapi import APIRouter, HTTPException, Response, Request
 
-from Auth.auth import get_password_hash, decode_token
-from Auth.dependencies import ServiceDep, get_user, UserIdDep
+from Auth.dependencies import ServiceDep, UserIdDep
 from Schemas.CommonScemas import MessageSchema
-from Schemas.JWTSchemas import JWTRefresh
 from Schemas.UserSchemas import SRegistration, SLogin, SAuth
-from jose import JWTError
 
 router = APIRouter()
 

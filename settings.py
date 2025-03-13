@@ -4,8 +4,6 @@ from dotenv import load_dotenv
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from DataBase.models import Base
-
 
 load_dotenv()
 
@@ -24,12 +22,3 @@ engine = create_async_engine(
 
 
 async_session = async_sessionmaker(engine, expire_on_commit=False)
-
-
-
-
-
-
-# async def delete_tables():
-#     async with engine.begin() as conn:
-#         await conn.run_sync(Base.metadata.drop_all)

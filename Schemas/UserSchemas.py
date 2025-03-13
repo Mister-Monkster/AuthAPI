@@ -1,7 +1,6 @@
 import datetime
-from typing import Optional, Any
-from typing_extensions import Self
 import re
+from typing import Optional
 
 from pydantic import BaseModel, field_validator, ConfigDict
 

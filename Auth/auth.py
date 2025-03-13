@@ -1,12 +1,9 @@
 from datetime import datetime, timezone, timedelta
 
+from jose import jwt, JWTError
 from passlib.context import CryptContext
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from settings import get_auth_data
-
-from jose import jwt, JWTError
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

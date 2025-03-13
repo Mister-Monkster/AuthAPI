@@ -1,13 +1,10 @@
 
-from fastapi import Depends, HTTPException, Response
-from sqlalchemy import select, update
+from fastapi import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from Auth.auth import get_password_hash, verify_password, create_access_token, create_refresh_token, decode_token
-from DataBase.models import UserModel
+from Auth.auth import verify_password, create_access_token, create_refresh_token, decode_token
 from DataBase.queries import get_user_query, create_user_query, get_user_by_id
-from Schemas.UserSchemas import SRegistration, SLogin, SAuth
-from jose import JWTError
+from Schemas.UserSchemas import SRegistration, SLogin
 
 
 class UserService:
