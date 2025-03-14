@@ -3,8 +3,8 @@ from fastapi import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from Auth.auth import verify_password, create_access_token, create_refresh_token, decode_token
-from DataBase.queries import get_user_query, create_user_query, get_user_by_id
-from Schemas.UserSchemas import SRegistration, SLogin
+from DataBase.queries import get_user_query, create_user_query, get_user_by_id, update_user_data_query
+from Schemas.UserSchemas import SRegistration, SLogin, SAuth
 
 
 class UserService:
@@ -23,9 +23,10 @@ class UserService:
             refresh_token = create_refresh_token({"sub": f'{user_data.id}'})
             return {"user": user_dict, "access_token": access_token, "refresh_token": refresh_token}
 
-    async def refresh(self, user_id: int, refresh_token: str):
-        user_data = await get_user_by_id(user_id, self.session)
+    async def refresh(self, refresh_token: str):
         payload = decode_token(refresh_token)
+        user_id = int(payload['sub'])
+        user_data = await get_user_by_id(user_id, self.session)
         if payload is None:
             return {"status_code": 401, "detail": 'Невалидный токен'}
         access_token = create_access_token({"sub": f'{user_data.id}'})
@@ -33,11 +34,24 @@ class UserService:
         user_dict.pop('password')
         return {"user": user_dict, "access_token": access_token}
 
-    @staticmethod
-    async def user_logout(response: Response, user_id: int):
-        response.delete_cookie(key='users_access_token')
-        response.delete_cookie(key='users_refresh_token')
-        return {"ok": True, "detail": "Пользователь вышел из системы."}
+    async def get_user_data(self, id: int):
+        user_data = await get_user_by_id(id, self.session)
+        user_dict = SRegistration.model_validate(user_data).model_dump()
+        user_dict.pop('password')
+        user = SAuth.model_validate(user_dict).model_dump()
+        return user
 
-    async def update_user_data(self):
-        pass
+    async def get_user_profile(self, access_token: str):
+        payload = decode_token(access_token)
+        user_id = int(payload['sub'])
+        user_data = await get_user_by_id(user_id, self.session)
+        return user_data
+
+    async def update_user_data(self, access_token: str, new_data: SAuth):
+        try:
+            payload = decode_token(access_token)
+            user_id = int(payload['sub'])
+            await update_user_data_query(user_id, new_data, self.session)
+            return True
+        except:
+            return False

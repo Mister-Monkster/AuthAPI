@@ -21,6 +21,20 @@ class SAuth(BaseModel):
     flat: Optional[int]
     bio: Optional[str]
 
+    @field_validator('phone', mode="before")
+    def validate_phone(cls, value):
+        if not value.isdigit():
+            raise ValueError('Номер не может содержать буквы')
+        return value
+
+    @field_validator('email', mode="before")
+    def validate_email(cls, value):
+        pattern = r"^[-\w\.]+@([-\w]+\.)+[-\w]{2,4}$"
+        if re.match(pattern, value) is not None:
+            return value
+        else:
+            raise ValueError('Данная электронная почта невалидная')
+
 
 class SRegistration(SLogin):
     username: str

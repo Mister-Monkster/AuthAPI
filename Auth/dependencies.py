@@ -27,18 +27,4 @@ async def get_userservice(session: SessionDep) -> UserService:
     return UserService(session)
 
 
-async def get_user(request: Request):
-    token = request.cookies.get('users_access_token')
-    if not token:
-        return None
-    payload = decode_token(token)
-    if payload:
-        user_id = payload.get('sub')
-        return int(user_id)
-    else:
-        print(payload)
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Невалидный токен')
-
-UserIdDep = Annotated[int, Depends(get_user)]
-
 ServiceDep = Annotated[UserService, Depends(get_userservice)]

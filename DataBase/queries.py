@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from Auth.auth import get_password_hash
 from DataBase.models import UserModel
-from Schemas.UserSchemas import SLogin, SRegistration
+from Schemas.UserSchemas import SLogin, SRegistration, SAuth
 
 
 async def get_user_query(user: SLogin, session: AsyncSession):
@@ -28,3 +28,9 @@ async def create_user_query(user: SRegistration, session: AsyncSession):
     session.add(new_user)
     await session.commit()
 
+
+async def update_user_data_query(user_id: int, new_data: SAuth, session: AsyncSession):
+    values = new_data.model_dump()
+    query = update(UserModel).where(UserModel.id == user_id).values(values)
+    await session.execute(query)
+    await session.commit()
