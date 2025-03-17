@@ -1,8 +1,5 @@
-
-from fastapi import Response
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from Auth.auth import verify_password, create_access_token, create_refresh_token, decode_token
+from utils.auth import verify_password, create_access_token, create_refresh_token, decode_token
 from DataBase.queries import get_user_query, create_user_query, get_user_by_id, update_user_data_query
 from Schemas.UserSchemas import SRegistration, SLogin, SAuth
 
@@ -12,16 +9,20 @@ class UserService:
         self.session = session
 
     async def registration(self, user: SRegistration):
-        await create_user_query(user, self.session)
+        try:
+            id = await create_user_query(user, self.session)
+            access_token = create_access_token({"sub": f'{id}'})
+            refresh_token = create_refresh_token({"sub": f'{id}'})
+            return {"access_token": access_token, "refresh_token": refresh_token}
+        except Exception:
+            raise Exception
 
     async def login(self, user: SLogin):
         user_data = await get_user_query(user, self.session)
         if user_data and verify_password(user.password, user_data.password):
-            user_dict = SRegistration.model_validate(user_data).model_dump()
-            user_dict.pop('password')
             access_token = create_access_token({"sub": f'{user_data.id}'})
             refresh_token = create_refresh_token({"sub": f'{user_data.id}'})
-            return {"user": user_dict, "access_token": access_token, "refresh_token": refresh_token}
+            return {"user": user_data, "access_token": access_token, "refresh_token": refresh_token}
 
     async def refresh(self, refresh_token: str):
         payload = decode_token(refresh_token)
@@ -55,3 +56,5 @@ class UserService:
             return True
         except:
             return False
+
+
