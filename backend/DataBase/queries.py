@@ -1,15 +1,18 @@
-from sqlalchemy import update, select
+from celery.worker.state import total_count
+from sqlalchemy import update, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utils.auth import get_password_hash
 from utils.validators import email_validator
 from DataBase.models import UserModel
-from Schemas.UserSchemas import SLogin, SRegistration, SAuth
+from Schemas.UserSchemas import SLogin, SRegistration, SAuth, SPasswordChange, SProfile
+
+
 
 
 async def get_user_query(user: SLogin, session: AsyncSession):
     if email_validator(user.login):
-        query = select(UserModel.username, UserModel.password).where(UserModel.email == user.login)
+        query = select(UserModel).where(UserModel.email == user.login)
     else:
         query = select(UserModel).where(UserModel.username == user.login)
     res = await session.execute(query)
@@ -31,6 +34,29 @@ async def get_user_by_email(email:str, session: AsyncSession):
     return user_data
 
 
+async def get_all_users_query(offset: int, session: AsyncSession, limit = 10, user_id: None|int = None) -> dict:
+    if user_id:
+        query = (select(
+            UserModel.username,
+            UserModel.bio,
+            UserModel.is_verificate
+        ).offset(offset).limit(limit).where(UserModel.id!=user_id))
+    else:
+        query = (select(
+            UserModel.username,
+            UserModel.bio,
+            UserModel.is_verificate
+        ).offset(offset).limit(limit))
+    res = await session.execute(query)
+    result = [SProfile.model_validate(item) for item in res.all()]
+    return {
+        "users": result,
+        "total": len(result),
+        "offset": offset,
+        "limit": limit
+    }
+
+
 async def create_user_query(user: SRegistration, session: AsyncSession):
     user_dict = user.model_dump()
     user_dict['password'] = get_password_hash(user.password)
@@ -46,6 +72,11 @@ async def update_user_data_query(user_id: int, new_data: SAuth, session: AsyncSe
     await session.execute(query)
     await session.commit()
 
+
+async def update_user_password_query(user_id: int, password: str, session: AsyncSession):
+    query = update(UserModel).where(UserModel.id == user_id).values({'password':get_password_hash(password)})
+    await session.execute(query)
+    await session.commit()
 
 async def create_oauth_user_query(user_dict, session: AsyncSession):
     email = user_dict['email']

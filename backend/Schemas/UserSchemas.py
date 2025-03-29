@@ -1,6 +1,8 @@
 import datetime
 import re
 from typing import Optional, Any
+
+from pydantic_core.core_schema import ValidationInfo
 from typing_extensions import Self
 
 from pydantic import BaseModel, field_validator, ConfigDict, EmailStr
@@ -10,6 +12,13 @@ class SLogin(BaseModel):
     login: str = ''
     password: str = ''
 
+
+class SProfile(BaseModel):
+    username: str
+    bio: Optional[str]
+    is_verificate: bool
+
+    model_config = ConfigDict(from_attributes=True)
 
 class SAuth(BaseModel):
     email: EmailStr
@@ -22,6 +31,8 @@ class SAuth(BaseModel):
     flat: Optional[int]
     bio: Optional[str]
     is_verificate: Optional[bool]
+
+    model_config = ConfigDict(from_attributes=True)
 
     @field_validator('phone', mode="before")
     def validate_phone(cls, value):
@@ -46,8 +57,9 @@ class SRegistration(BaseModel):
 
     @field_validator("flat", mode="before")
     def validate_flat(cls, value):
-        if not value.isdigit:
-            raise ValueError('В поле "квартира" могут быть только цифры.')
+        if value:
+            if not value.isdigit:
+                raise ValueError('В поле "квартира" могут быть только цифры.')
 
     @field_validator("password", mode="before")
     def validate_password(cls, value):
@@ -63,6 +75,19 @@ class SRegistration(BaseModel):
             raise ValueError('Номер не может содержать буквы')
         return value
 
+
+
+class  SPasswordChange(BaseModel):
+    old_password: str
+    new_password: str
+    confirm_new_password: str
+
+    @field_validator('confirm_new_password')
+    def validate(cls, value, info: ValidationInfo):
+        if value == info.data['new_password'] and value != info.data['old_password']:
+            return value
+        else:
+            raise ValueError('Новый пароль не совпадает с полем проверки пароля.')
 
 
 

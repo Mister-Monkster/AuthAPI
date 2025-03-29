@@ -17,12 +17,12 @@ class Oauth2Service:
             client_secret=client_secret,
             client_kwargs={
                 'scope': 'email openid profile',
-                'redirect_uri': 'http://localhost:8000/auth'
+                'redirect_uri': 'http://localhost:5173/'
             }
         )
 
     async def register_or_update(self, user_dict):
         id = await create_oauth_user_query(user_dict, self.session)
-        access_token = create_access_token({'sub': id})
-        refresh_token = create_refresh_token({'sub': id})
+        access_token = create_access_token({'sub': f'{id}'})
+        refresh_token = create_refresh_token({'sub': f'{id}'})
         return {"access_token": access_token, "refresh_token": refresh_token}
