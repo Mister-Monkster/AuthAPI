@@ -13,7 +13,7 @@ async def register(user: SRegistration, service: user_service, service2: email_s
     try:
         to_email = user.email,
         subject = "Завершите регистрацию."
-        SRegistration.model_validate(user, )
+        SRegistration.model_validate(user)
         await service2.mail_sender(to_email=to_email, subject=subject)
         data = await service.registration(user)
         refresh_token = data['refresh_token']
@@ -37,13 +37,12 @@ async def register(user: SRegistration, service: user_service, service2: email_s
     return message
 
 
-@auth_router.post('/verification', summary='Подтверждение email')
+@auth_router.post('/verification', summary='Подтверждение email✅')
 async def email_verification(
                              request: Request,
                              service: user_service,
                              e_service: email_service,
                              code: str = Body(..., embed=True)):
-    print(code)
     try:
         access_token = request.cookies.get('users_access_token')
         user = await service.get_user_profile(access_token)
@@ -59,17 +58,15 @@ async def email_verification(
         raise HTTPException(status_code=401, detail='Вы не авторизованы')
 
 
-@auth_router.post('/code-retry', summary='Повторная отправка кода')
+@auth_router.post('/code-retry', summary='Повторная отправка кода🔁')
 async def code_retry(request: Request, e_service:email_service, service: user_service):
     access_token = request.cookies.get('users_access_token')
     user = await service.get_user_profile(access_token)
     to_email = user.email,
     subject = "Завершите регистрацию."
-    SRegistration.model_validate(user, )
+    SRegistration.model_validate(user)
     await e_service.mail_sender(to_email=to_email, subject=subject)
     return {"ok": True}
-
-
 
 
 @auth_router.post('/login', summary='Авторизация🆔')
@@ -124,7 +121,7 @@ async def logout(response: Response) -> MessageSchema:
     return message
 
 
-@auth_router.get("/user/{id}",  summary='Получить данные пользователя')
+@auth_router.get("/user/{id}",  summary='Получить данные пользователяℹ️')
 async def get_user(id: int, service: user_service) -> SAuth:
     try:
         res = await service.get_user_data(id)
@@ -134,7 +131,7 @@ async def get_user(id: int, service: user_service) -> SAuth:
 
 
 @auth_router.get("/users", summary='Все пользователи')
-async def get_all_users(request:Request, service: user_service, offset: int = Query(0, ge=0)):
+async def get_all_users(request: Request, service: user_service, offset: int = Query(0, ge=0)):
     try:
         access_token = request.cookies.get('users_access_token')
         res = await service.get_users(offset, access_token=access_token)
@@ -142,7 +139,8 @@ async def get_all_users(request:Request, service: user_service, offset: int = Qu
     except:
         raise HTTPException(status_code=404, detail='Пользователи не найдены')
 
-@auth_router.get("/my-profile", summary='Получить мои данные')
+
+@auth_router.get("/my-profile", summary='Получить мои данныеℹ️')
 async def get_user(request: Request, service: user_service):
     try:
         access_token = request.cookies.get('users_access_token')
@@ -153,8 +151,8 @@ async def get_user(request: Request, service: user_service):
 
 
 @auth_router.put('/user/update', summary='Изменение данных✏️')
-async def update_user(requset: Request, response: Response, user_data: SAuth, service: user_service):
-    access_token = requset.cookies.get('users_access_token')
+async def update_user(request: Request, response: Response, user_data: SAuth, service: user_service):
+    access_token = request.cookies.get('users_access_token')
     res = await service.update_user_data(access_token, user_data)
     if res:
         return {'ok': True, 'detail': "Данные успешно изменены"}
@@ -163,8 +161,8 @@ async def update_user(requset: Request, response: Response, user_data: SAuth, se
 
 
 @auth_router.put('/user/update-password', summary='Изменение пароля✏️')
-async def update_user(requset: Request, response: Response, password_schema: SPasswordChange, service: user_service):
-    access_token = requset.cookies.get('users_access_token')
+async def update_user(request: Request, response: Response, password_schema: SPasswordChange, service: user_service):
+    access_token = request.cookies.get('users_access_token')
     password = password_schema.new_password
     old_password = password_schema.old_password
     res = await service.update_user_password(access_token, password, old_password)
@@ -174,5 +172,16 @@ async def update_user(requset: Request, response: Response, password_schema: SPa
         return {'ok': True, 'detail': "Пароль успешно изменен!"}
     else:
         return HTTPException(status_code=response.status_code, detail='Ошибка изменения данных')
+
+
+@auth_router.delete("/user/delete", summary='Удалить профиль⛔️')
+async def delete_profile(request: Request, response: Response, service: user_service):
+    access_token = request.cookies.get('users_access_token')
+    try:
+        res = await service.delete_user(access_token)
+        response.delete_cookie(key='users_access_token', httponly=True, samesite='lax', secure=False)
+        response.delete_cookie(key='users_refresh_token', httponly=True, samesite='lax', secure=False)
+    except HTTPException:
+        raise HTTPException(status_code=401, detail='Not authorize')
 
 

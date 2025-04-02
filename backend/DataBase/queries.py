@@ -1,13 +1,11 @@
 from celery.worker.state import total_count
-from sqlalchemy import update, select, func
+from sqlalchemy import update, select, func, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utils.auth import get_password_hash
 from utils.validators import email_validator
 from DataBase.models import UserModel
 from Schemas.UserSchemas import SLogin, SRegistration, SAuth, SPasswordChange, SProfile
-
-
 
 
 async def get_user_query(user: SLogin, session: AsyncSession):
@@ -78,6 +76,7 @@ async def update_user_password_query(user_id: int, password: str, session: Async
     await session.execute(query)
     await session.commit()
 
+
 async def create_oauth_user_query(user_dict, session: AsyncSession):
     email = user_dict['email']
     user = await get_user_by_email(email, session)
@@ -94,5 +93,17 @@ async def create_oauth_user_query(user_dict, session: AsyncSession):
 
 async def change_verification_status(email: str, session: AsyncSession):
     query = update(UserModel).where(UserModel.email == email). values({'is_verificate': True})
+    await session.execute(query)
+    await session.commit()
+
+
+async def delete_user_query(user_id: int, session: AsyncSession):
+    query = delete(UserModel).where(UserModel.id == user_id)
+    await session.execute(query)
+    await session.commit()
+
+
+async def recovery_password_query(email: str, new_password: str, session: AsyncSession):
+    query = update(UserModel).where(UserModel.email == email).values({'password': get_password_hash(new_password)})
     await session.execute(query)
     await session.commit()

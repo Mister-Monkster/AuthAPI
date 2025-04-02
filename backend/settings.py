@@ -11,6 +11,9 @@ load_dotenv()
 def get_db_url():
     return os.getenv('DB_URL')
 
+def get_domain():
+    return os.getenv('DOMAIN')
+
 
 def get_auth_data():
     return {"secret_key": os.getenv("SECRET_KEY"), "algorithm":os.getenv("ALGORITHM")}

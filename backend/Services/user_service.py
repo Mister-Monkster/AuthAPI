@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from utils.auth import verify_password, create_access_token, create_refresh_token, decode_token
 from DataBase.queries import (get_user_query, create_user_query, get_user_by_id, update_user_data_query,
-                              update_user_password_query, get_all_users_query)
+                              update_user_password_query, get_all_users_query, delete_user_query)
 from Schemas.UserSchemas import SRegistration, SLogin, SAuth, SPasswordChange
 
 
@@ -76,6 +76,16 @@ class UserService:
             return True
         except Exception:
             raise Exception
+
+    async def delete_user(self, access_token: str):
+        try:
+            payload = decode_token(access_token)
+            user_id = int(payload['sub'])
+            await delete_user_query(user_id, self.session)
+            return True
+        except Exception:
+            raise Exception
+
 
 
 

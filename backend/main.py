@@ -5,6 +5,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from routers.user_router import auth_router
 from routers.Oauth2_router import oauth2_router
+from routers.recovery_router import recovery_router
 
 
 
@@ -22,7 +23,9 @@ app.add_middleware(SessionMiddleware, secret_key='secret')
 
 
 app.include_router(router=auth_router)
+app.include_router(router=recovery_router)
 app.include_router(router=oauth2_router)
+
 
 
 if __name__ == "__main__":

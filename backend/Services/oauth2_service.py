@@ -23,6 +23,6 @@ class Oauth2Service:
 
     async def register_or_update(self, user_dict):
         id = await create_oauth_user_query(user_dict, self.session)
-        access_token = create_access_token({'sub': f'{id}'})
-        refresh_token = create_refresh_token({'sub': f'{id}'})
+        access_token = create_access_token({'sub': f'{1123}'})
+        refresh_token = create_refresh_token({'sub': f'{1123}'})
         return {"access_token": access_token, "refresh_token": refresh_token}

@@ -8,14 +8,14 @@ from utils.dependencies import oauth2_service
 oauth2_router = APIRouter(tags=['Google Oauth2'])
 
 
-@oauth2_router.get('/google', summary='Вход с помощью Google')
+@oauth2_router.get('/google', summary='Вход с помощью Google📱')
 async def google_auth(request: Request, service: oauth2_service):
     redirect_uri = 'http://localhost:8000/auth'
     token = await service.oauth.google.authorize_redirect(request, redirect_uri)
     return token
 
 
-@oauth2_router.get('/auth', summary='Вход с помощью Google')
+@oauth2_router.get('/auth', summary='Вход с помощью Google📱')
 async def auth(request: Request, service: oauth2_service):
     token = await service.oauth.google.authorize_access_token(request)
     user = token.get('userinfo')

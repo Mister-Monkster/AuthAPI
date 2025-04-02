@@ -20,6 +20,7 @@ class SProfile(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class SAuth(BaseModel):
     email: EmailStr
     username: str
@@ -76,8 +77,7 @@ class SRegistration(BaseModel):
         return value
 
 
-
-class  SPasswordChange(BaseModel):
+class SPasswordChange(BaseModel):
     old_password: str
     new_password: str
     confirm_new_password: str
@@ -85,6 +85,26 @@ class  SPasswordChange(BaseModel):
     @field_validator('confirm_new_password')
     def validate(cls, value, info: ValidationInfo):
         if value == info.data['new_password'] and value != info.data['old_password']:
+            return value
+        else:
+            raise ValueError('Новый пароль не совпадает с полем проверки пароля.')
+
+
+class SPasswordRecovery(BaseModel):
+    password: str
+    confirm_password: str
+
+    @field_validator("password", mode="before")
+    def validate_password(cls, value):
+        if len(value) < 8:
+            raise ValueError('Пароль слишком короткий')
+        elif value.islower():
+            raise ValueError('В пароле должна содержаться хотя бы одна заглавная буква')
+        return value
+
+    @field_validator('confirm_password')
+    def validate(cls, value, info: ValidationInfo):
+        if value == info.data['password']:
             return value
         else:
             raise ValueError('Новый пароль не совпадает с полем проверки пароля.')
