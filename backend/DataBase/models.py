@@ -1,7 +1,7 @@
 import datetime
 from typing import Annotated, Optional
 
-from sqlalchemy import String
+from sqlalchemy import String, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 pk = Annotated[int, mapped_column(primary_key=True, autoincrement=True)]
@@ -13,6 +13,10 @@ class Base(DeclarativeBase):
 
 class UserModel(Base):
     __tablename__ = 'users'
+
+    __table_args__ = (
+        UniqueConstraint('google_sub', 'email', name='uq_users_google_sub_email'),
+    )
 
     id: Mapped[pk]
     username: Mapped[str] = mapped_column(String(24), index=True)
@@ -26,4 +30,4 @@ class UserModel(Base):
     flat: Mapped[Optional[str]]
     bio: Mapped[Optional[str]] = mapped_column(String(1024))
     is_verificate: Mapped[bool] = mapped_column(default=False)
-    google_sub: Mapped[Optional[str]] = mapped_column(default='', nullable=True)
+    google_sub: Mapped[Optional[str]] = mapped_column(nullable=True, unique=True, server_default=None)

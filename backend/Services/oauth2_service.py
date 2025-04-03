@@ -2,13 +2,14 @@ from authlib.integrations.starlette_client import OAuth
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utils.auth import create_access_token, create_refresh_token
-from DataBase.queries import create_oauth_user_query
+
 from settings import client_id, client_secret
+from Repositories.user_repository import UserRepository
 
 
 class Oauth2Service:
-    def __init__(self,  session: AsyncSession):
-        self.session = session
+    def __init__(self, repository: UserRepository):
+        self.repository = repository
         self.oauth = OAuth()
         self.oauth.register(
             name='google',
@@ -22,7 +23,7 @@ class Oauth2Service:
         )
 
     async def register_or_update(self, user_dict):
-        id = await create_oauth_user_query(user_dict, self.session)
-        access_token = create_access_token({'sub': f'{1123}'})
-        refresh_token = create_refresh_token({'sub': f'{1123}'})
+        id = await self.repository.create_oauth_user_query(user_dict)
+        access_token = create_access_token({'sub': f'{id}'})
+        refresh_token = create_refresh_token({'sub': f'{id}'})
         return {"access_token": access_token, "refresh_token": refresh_token}

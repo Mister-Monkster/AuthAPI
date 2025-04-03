@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException, Response, Request, Body, Query
 
 from utils.dependencies import user_service, email_service
-from Schemas.CommonScemas import MessageSchema
 from Schemas.UserSchemas import SRegistration, SLogin, SAuth, SPasswordChange
 
 
@@ -9,12 +8,10 @@ auth_router = APIRouter(tags=['Аутентификация',])
 
 
 @auth_router.post('/registration', summary='Регистрация🆕')
-async def register(user: SRegistration, service: user_service, service2: email_service, response: Response) -> MessageSchema:
+async def register(user: SRegistration, service: user_service, service2: email_service, response: Response):
     try:
         to_email = user.email,
-        subject = "Завершите регистрацию."
-        SRegistration.model_validate(user)
-        await service2.mail_sender(to_email=to_email, subject=subject)
+        await service2.mail_sender(to_email=to_email)
         data = await service.registration(user)
         refresh_token = data['refresh_token']
         access_token = data['access_token']
@@ -31,10 +28,9 @@ async def register(user: SRegistration, service: user_service, service2: email_s
                             samesite='lax',
                             secure=False,
                             max_age=900)
-        message = MessageSchema(ok=True, detail='Вы успешно прошли регистрацию. Проверьте указанный email')
     except Exception as e:
         raise HTTPException(status_code=422, detail=f'{e}')
-    return message
+    return {"ok": True, "detail" :"'Вы успешно прошли регистрацию. Проверьте указанный email"}
 
 
 @auth_router.post('/verification', summary='Подтверждение email✅')
@@ -45,13 +41,10 @@ async def email_verification(
                              code: str = Body(..., embed=True)):
     try:
         access_token = request.cookies.get('users_access_token')
-        user = await service.get_user_profile(access_token)
-        if not user.is_verificate:
-            if await e_service.check_code(int(code), user.email):
-                return {'ok': True, 'detail': 'Вы успешно прошли верификацию'}
-            else:
-                return {'ok': False, 'detail': "Введен неверный код"}
-
+        user = await service.get_user_status(access_token)
+        code = await e_service.check_code(int(code), user.email)
+        if code and user:
+            return {'ok':  True, 'detail': 'Вы успешно прошли верификацию'}
         else:
             return {'ok': True, "detail": "Вы уже верифицированы"}
     except:
@@ -63,9 +56,7 @@ async def code_retry(request: Request, e_service:email_service, service: user_se
     access_token = request.cookies.get('users_access_token')
     user = await service.get_user_profile(access_token)
     to_email = user.email,
-    subject = "Завершите регистрацию."
-    SRegistration.model_validate(user)
-    await e_service.mail_sender(to_email=to_email, subject=subject)
+    await e_service.mail_sender(to_email=to_email)
     return {"ok": True}
 
 
@@ -114,14 +105,13 @@ async def refresh_token(
 
 
 @auth_router.post('/logout', summary='Выход❌')
-async def logout(response: Response) -> MessageSchema:
+async def logout(response: Response):
     response.delete_cookie(key='users_access_token', httponly=True, samesite='lax', secure=False)
     response.delete_cookie(key='users_refresh_token', httponly=True, samesite='lax', secure=False)
-    message = MessageSchema.model_validate({'ok': True, 'detail': 'Вы успешно вышли из системы'})
-    return message
+    return {'ok': True, 'detail': 'Вы успешно вышли из системы'}
 
 
-@auth_router.get("/user/{id}",  summary='Получить данные пользователяℹ️')
+@auth_router.get("/user/{id}", summary="Получить данные пользователяℹ️")
 async def get_user(id: int, service: user_service) -> SAuth:
     try:
         res = await service.get_user_data(id)
