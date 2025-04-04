@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Response
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
-from utils.dependencies import oauth2_service
 
+from dependecies.service_depends import oauth2_service
 
 oauth2_router = APIRouter(tags=['Google Oauth2'])
 

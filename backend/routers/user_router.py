@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Response, Request, Body, Query
 
-from utils.dependencies import user_service, email_service
-from Schemas.UserSchemas import SRegistration, SLogin, SAuth, SPasswordChange
 
+from Schemas.UserSchemas import SRegistration, SLogin, SAuth, SPasswordChange
+from dependecies.service_depends import user_service, email_service
 
 auth_router = APIRouter(tags=['Аутентификация',])
 

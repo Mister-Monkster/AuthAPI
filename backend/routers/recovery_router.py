@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Body
 
-from utils.dependencies import email_service
+
 
 from Schemas.UserSchemas import SPasswordRecovery
-
+from dependecies.service_depends import email_service
 
 recovery_router = APIRouter(tags=['Востановление пароля',], prefix='/recovery')
 
