@@ -34,7 +34,7 @@ class UserService:
             return {"status_code": 401, "detail": 'Невалидный токен'}
         access_token = create_access_token({"sub": f'{user_data.id}'})
         user_dict = SAuth.model_validate(user_data).model_dump(exclude_unset=True)
-        return {"user": user_dict, "access_token": access_token}
+        return {"user": user_data, "access_token": access_token}
 
     async def get_user_data(self, id: int) -> SRegistration:
         user_data = await self.repository.get_user_by_id(id)

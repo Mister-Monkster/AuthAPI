@@ -78,10 +78,10 @@ class UserRepository:
     async def create_oauth_user_query(self, user_dict):
         email = user_dict['email']
         user = await self.get_user_by_email(email)
+        print(user)
         if user:
             query = update(UserModel).where(UserModel.email == email).values({"google_sub": user_dict['google_sub']})
             await self.session.execute(query)
-            return user.id
         else:
             user = UserModel(**user_dict)
             self.session.add(user)

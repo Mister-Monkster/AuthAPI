@@ -29,11 +29,12 @@ class SAuth(BaseModel):
     city: Optional[str]
     street: Optional[str]
     home: Optional[str]
-    flat: Optional[int]
+    flat: Optional[str]
     bio: Optional[str]
     is_verificate: Optional[bool]
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True,
+                              extra='ignore')
 
     @field_validator('phone', mode="before")
     def validate_phone(cls, value):
