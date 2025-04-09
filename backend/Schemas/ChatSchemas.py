@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from pydantic import BaseModel, field_validator, ConfigDict
-from pydantic_core.core_schema import ValidationInfo
+from pydantic import BaseModel, ConfigDict
+
 
 
 class UserResponse(BaseModel):

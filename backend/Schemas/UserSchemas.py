@@ -36,6 +36,7 @@ class SAuth(BaseModel):
     model_config = ConfigDict(from_attributes=True,
                               extra='ignore')
 
+
     @field_validator('phone', mode="before")
     def validate_phone(cls, value):
         if not value.isdigit():

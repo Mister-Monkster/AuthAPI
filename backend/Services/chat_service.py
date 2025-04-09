@@ -60,3 +60,25 @@ class ChatService:
         except Exception as e:
             print(e)
 
+    async def delete_message(self, access_token: str, message_id: int):
+        try:
+            if user_id := await self.is_authorize(access_token):
+                res = await self.repository.delete_message_query(message_id, user_id)
+                if res:
+                    return True
+                else:
+                    return False
+        except Exception as e:
+            print(e)
+
+    async def delete_chat(self, access_token: str, chat_id: int):
+        try:
+            if user_id := await self.is_authorize(access_token):
+                res = await self.repository.delete_chat_query(user_id, chat_id)
+                if res:
+                    return True
+                else:
+                    return False
+        except Exception as e:
+            print(e)
+

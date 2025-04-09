@@ -1,4 +1,4 @@
-from sqlalchemy import select, desc, func
+from sqlalchemy import select, desc, func, delete
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, aliased, selectinload
@@ -78,3 +78,16 @@ class ChatRepository:
         self.session.add(new_message)
         await self.session.commit()
         return new_message
+
+    async def delete_message_query(self, user_id:int, message_id:int):
+        query = delete(MessageModel).where(MessageModel.user_id == user_id, MessageModel.id == message_id)
+        await self.session.execute(query)
+        await self.session.commit()
+        return True
+
+    async def delete_chat_query(self, user_id:int, chat_id:int):
+        query = delete(ChatModel).where((ChatModel.user_1 == user_id or ChatModel.user_2 == user_id) and
+                                        ChatModel.id == chat_id)
+        await self.session.execute(query)
+        await self.session.commit()
+        return True

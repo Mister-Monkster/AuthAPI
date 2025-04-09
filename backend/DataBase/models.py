@@ -2,7 +2,7 @@ import datetime
 from typing import Annotated, Optional
 
 from sqlalchemy import String, UniqueConstraint, ForeignKey, text, CheckConstraint, Index, func
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, relationship, mapped_column, DeclarativeBase
 
 pk = Annotated[int, mapped_column(primary_key=True, autoincrement=True)]
 created_at = Annotated[datetime.datetime, mapped_column(server_default=text("TIMEZONE( 'utc', now())"))]
@@ -76,4 +76,3 @@ class MessageModel(Base):
     text: Mapped[str]
     sending_date: Mapped[created_at]
     updated_at: Mapped[updated_at]
-
